@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer");
 const supabase = require("../../utils/supabase-client");
-const moment  = require("moment")
+const moment = require("moment");
 const surveyController = {
   async generatePdf(req, res, next) {
     try {
@@ -143,7 +143,7 @@ const surveyController = {
         throw new Error("Failed to generate public URL for the uploaded file");
       }
 
-      return res.status(200).send({ publicUrlData });
+      return res.status(200).json({ publicUrlData });
     } catch (error) {
       next(error); // Pass error to middleware
     }
