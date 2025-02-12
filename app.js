@@ -7,7 +7,7 @@ var server = http.createServer(app);
 const port = process.env.PORT || 3000;
 
 //require database service to connect db
-require("./config/db");
+// require("./config/db");
 
 
 app.use("/api/v1", require("./apis/routes/index"));

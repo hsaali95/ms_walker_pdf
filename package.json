@@ -4,7 +4,7 @@
   "description": "This is the backend Architecture of the basic project created using ExpressJS framework.",
   "main": "app.js",
   "scripts": {
-    "local": "NODE_ENV=local nodemon  app.js ",
+    "local": "set NODE_ENV=local & nodemon  app.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
