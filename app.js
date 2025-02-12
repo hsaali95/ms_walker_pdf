@@ -1,10 +1,10 @@
-const helper = require("./helper/helper");
-const http = require("http");
 const dotenv = require("dotenv");
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+const helper = require("./helper/helper");
+const http = require("http");
 const app = require("./config/express");
 var server = http.createServer(app);
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 //require database service to connect db
 // require("./config/db");
