@@ -32,10 +32,10 @@ const surveyController = {
           </div>
           <h2>Report</h2>
           ${
-            startDate
+            startDate && endDate
               ? `<h3>Date: from ${moment(startDate).format("DD/MM/YYYY")} to ${
-                  endDate
-                    ? moment(endDate).format("DD/MM/YYYY")
+                  moment(endDate).format("DD/MM/YYYY")
+                    ? moment(startDate).format("DD/MM/YYYY")
                     : moment().format("DD/MM/YYYY")
                 }</h3>`
               : ""
