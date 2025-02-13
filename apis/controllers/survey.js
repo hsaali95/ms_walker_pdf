@@ -121,8 +121,9 @@ const surveyController = {
 
       // Generate PDF buffer
       const pdfBuffer = await page.pdf({
-        format: "A4",
+        format: "A3",
         printBackground: true,
+        landscape: true,
       });
 
       await browser.close();
