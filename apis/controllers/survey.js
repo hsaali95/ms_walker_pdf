@@ -70,7 +70,7 @@ const surveyController = {
                           <td>${row.id || "-"}</td>
                           <td>${
                             row?.created_at
-                              ? moment(row.created_at).format("DD/MM/YYYY")
+                              ? moment(row.created_at).add(1, "day").format("DD/MM/YYYY")
                               : "-"
                           }</td>
                           <td>${row?.account?.fullCustomerInfo || "-"}</td>
