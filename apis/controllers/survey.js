@@ -31,9 +31,11 @@ const surveyController = {
             <img src="data:image/png;base64,${MsWalkerLogoBase64}" alt="Survey Logo" style="width: 300px;" />
           </div>
           <h2>Report</h2>
-          ${`<h3>Date: from ${moment(startDate).format("DD/MM/YYYY")} to ${
+          ${`<h3>Date: from ${moment(startDate)
+            .date.add(1, "day")
+            .format("DD/MM/YYYY")} to ${
             endDate
-              ? moment(endDate).format("DD/MM/YYYY")
+              ? moment(endDate).date.add(1, "day").format("DD/MM/YYYY")
               : moment().format("DD/MM/YYYY")
           }</h3>`}
           <table>
