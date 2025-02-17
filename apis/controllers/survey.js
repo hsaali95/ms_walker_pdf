@@ -33,11 +33,9 @@ const surveyController = {
           <h2>Report</h2>
         ${
           startDate
-            ? `<h3>Date: from ${moment(startDate)
-                .add(1, "day") // Correct usage
-                .format("DD/MM/YYYY")} to ${
+            ? `<h3>Date: from ${moment(startDate).format("DD/MM/YYYY")} to ${
                 endDate
-                  ? moment(endDate).add(1, "day").format("DD/MM/YYYY") // Correct usage
+                  ? moment(endDate).format("DD/MM/YYYY") // Correct usage
                   : moment().format("DD/MM/YYYY")
               } </h3>`
             : ""
@@ -70,7 +68,7 @@ const surveyController = {
                           <td>${row.id || "-"}</td>
                           <td>${
                             row?.created_at
-                              ? moment(row.created_at).add(1, "day").format("DD/MM/YYYY")
+                              ? moment(row.created_at).format("DD/MM/YYYY")
                               : "-"
                           }</td>
                           <td>${row?.account?.fullCustomerInfo || "-"}</td>
