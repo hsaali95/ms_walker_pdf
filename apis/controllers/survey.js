@@ -118,7 +118,7 @@ const surveyController = {
       // Set the HTML content
       await page.setContent(htmlContent, {
         waitUntil: "networkidle0", // Wait for all network requests to complete
-        timeout: 480000, // 8 minutes
+        // timeout: 480000, // 8 minutes
       });
 
       // Generate PDF buffer
