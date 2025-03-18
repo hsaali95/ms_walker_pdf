@@ -1,6 +1,8 @@
 const puppeteer = require("puppeteer");
 const supabase = require("../../utils/supabase-client");
 const moment = require("moment");
+const path = require("path");
+const fs = require("fs");
 const surveyController = {
   async generatePdf(req, res, next) {
     try {
@@ -12,7 +14,14 @@ const surveyController = {
         endDate,
         MsWalkerLogoBase64,
       } = req.body;
-      const htmlContent = `
+
+      const filePath = path.join(
+        __dirname,
+        `../../files/large-file-${new Date().toISOString().replaceAll(":", "-")}.html`
+      );
+      const writeStream = fs.createWriteStream(filePath);
+
+      const topContent = `
       <html>
         <head>
           <style>
@@ -58,68 +67,70 @@ const surveyController = {
                 <th>Images Links</th>
               </tr>
             </thead>
-            <tbody>
-              ${
-                Array.isArray(data)
-                  ? data
-                      .map(
-                        (row) => `
-                        <tr>
-                          <td>${row.id || "-"}</td>
-                          <td>${
-                            row?.created_at
-                              ? moment(row.created_at).format("DD/MM/YYYY")
-                              : "-"
-                          }</td>
-                          <td>${row?.account?.fullCustomerInfo || "-"}</td>
-                          <td>${row?.account?.custNumber || "-"}</td>
-                          <td>${row?.account?.city || "-"}</td>
-                          <td>${row?.display?.display_type || "-"}</td>
-                          <td>${row?.supplier?.["Vendor Name"] || "-"}</td>
-                          <td>${row?.item?.ItemFullInfo || "-"}</td>
-                          <td>${row?.survey_status?.status || "-"}</td>
-                          <td>${row?.number_of_cases || "-"}</td>
-                          <td>${row?.display_coast || "-"}</td>
-                          <td>
-                            ${
-                              Array.isArray(row.survey_file)
-                                ? row.survey_file
-                                    .map((file, i) =>
-                                      file?.file?.path
-                                        ? `<a href="${
-                                            SURVEY_IMAGE_BASE_URL +
-                                            file.file.path
-                                          }" target="_blank">View Image ${
-                                            i + 1
-                                          }</a>`
-                                        : "-"
-                                    )
-                                    .join("<br />")
-                                : "-"
-                            }
-                          </td>
-                        </tr>
-                      `
-                      )
-                      .join("")
-                  : ""
-              }
-            </tbody>
-          </table>
-        </body>
-      </html>
+            <tbody>`;
+
+      writeStream.write(topContent);
+
+      const getContent = (row, index) =>
+        `<tr>
+        <td>${row.id || "-"}</td>
+        <td>${
+          row?.created_at ? moment(row.created_at).format("DD/MM/YYYY") : "-"
+        }</td>
+        <td>${row?.account?.fullCustomerInfo || "-"}</td>
+        <td>${row?.account?.custNumber || "-"}</td>
+        <td>${row?.account?.city || "-"}</td>
+        <td>${row?.display?.display_type || "-"}</td>
+        <td>${row?.supplier?.["Vendor Name"] || "-"}</td>
+        <td>${row?.item?.ItemFullInfo || "-"}</td>
+        <td>${row?.survey_status?.status || "-"}</td>
+        <td>${row?.number_of_cases || "-"}</td>
+        <td>${row?.display_coast || "-"}</td>
+        <td>
+          ${
+            Array.isArray(row.survey_file)
+              ? row.survey_file
+                  .map((file, i) =>
+                    file?.file?.path
+                      ? `<a href="${
+                          SURVEY_IMAGE_BASE_URL + file.file.path
+                        }" target="_blank">View Image ${i + 1}</a>`
+                      : "-"
+                  )
+                  .join("<br />")
+              : "-"
+          }
+        </td>
+      </tr>
+      ${index + 1 === row.length ? `</tbody> </table> </body> </html>` : ``}
     `;
+
+      let index = 0;
+      function write() {
+        let ok = true;
+
+        while (index < data.length && ok) {
+          ok = writeStream.write(getContent(data[index], index));
+          index++;
+        }
+
+        if (index < data.length) {
+          writeStream.once("drain", write); // Wait for buffer to empty
+        } else {
+          writeStream.end(() => console.log("File writing completed."));
+        }
+      }
+
+      write();
+
       // Launch a headless browser
       const browser = await puppeteer.launch({
+        headless: "new",
+        timeout: 0, // 8 minutes
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
       const page = await browser.newPage();
-
-      // Set the HTML content
-      await page.setContent(htmlContent, {
-        waitUntil: "networkidle0", // Wait for all network requests to complete
-        timeout: 480000, // 8 minutes
-      });
+      await page.goto(`file://${filePath}`, { waitUntil: "load" });
 
       // Generate PDF buffer
       const pdfBuffer = await page.pdf({
@@ -130,7 +141,7 @@ const surveyController = {
 
       await browser.close();
 
-      // Upload the PDF to Supabase
+      // // Upload the PDF to Supabase
       const { error: uploadError } = await supabase.storage
         .from("mas-walker-file")
         .upload(uniqueFileName, pdfBuffer, { contentType: "application/pdf" });
@@ -138,6 +149,8 @@ const surveyController = {
       if (uploadError) {
         throw new Error("Failed to upload file to Supabase");
       }
+
+      await fs.promises.unlink(filePath);
 
       // Get public URL
       const { data: publicUrlData } = supabase.storage
@@ -150,6 +163,7 @@ const surveyController = {
 
       return res.status(200).json({ publicUrlData });
     } catch (error) {
+      console.log(error);
       next(error); // Pass error to middleware
     }
   },
