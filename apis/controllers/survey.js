@@ -139,7 +139,9 @@ const surveyController = {
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
       const page = await browser.newPage();
+      console.log("here");
       await page.goto(`file://${filePath}`, { waitUntil: "load" });
+      console.log("here2");
 
       // Generate PDF buffer
       const pdfBuffer = await page.pdf({
@@ -148,14 +150,15 @@ const surveyController = {
         landscape: true,
         timeout: 0, //or time taken for your process in ms (eg) 60000
       });
-
+      console.log("here3");
       await browser.close();
+      console.log("here4");
 
       // // Upload the PDF to Supabase
       const { error: uploadError } = await supabase.storage
         .from("mas-walker-file")
         .upload(uniqueFileName, pdfBuffer, { contentType: "application/pdf" });
-
+      console.log("here5");
       if (uploadError) {
         throw new Error("Failed to upload file to Supabase");
       }
