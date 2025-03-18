@@ -19,3 +19,7 @@ app.get("/working", (req, res) => {
 server.listen(port, () => {
   helper.serverStartLog(port);
 });
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1); // Exit to prevent an unstable state
+});
