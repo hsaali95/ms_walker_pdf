@@ -14,11 +14,19 @@ const surveyController = {
         endDate,
         MsWalkerLogoBase64,
       } = req.body;
-
+      const dirPath = path.join(__dirname, `../../files`);
       const filePath = path.join(
         __dirname,
-        `../../files/large-file-${new Date().toISOString().replaceAll(":", "-")}.html`
+        `../../files/large-file-${new Date()
+          .toISOString()
+          .replaceAll(":", "-")}.html`
       );
+
+      // Ensure directory exists
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true }); // Creates nested directories if needed
+      }
+
       const writeStream = fs.createWriteStream(filePath);
 
       const topContent = `
