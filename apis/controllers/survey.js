@@ -133,7 +133,7 @@ const surveyController = {
 
       // Launch a headless browser
       const browser = await puppeteer.launch({
-        headless: "new",
+        headless: true,
         timeout: 0, // 8 minutes
         protocolTimeout: 240000,// 60 
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
