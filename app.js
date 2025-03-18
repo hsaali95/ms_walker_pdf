@@ -9,7 +9,6 @@ const port = process.env.PORT || 3001;
 //require database service to connect db
 // require("./config/db");
 
-
 app.use("/api/v1", require("./apis/routes/index"));
 
 app.get("/working", (req, res) => {
@@ -22,4 +21,8 @@ server.listen(port, () => {
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
   process.exit(1); // Exit to prevent an unstable state
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
