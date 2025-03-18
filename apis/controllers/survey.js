@@ -135,7 +135,7 @@ const surveyController = {
       const browser = await puppeteer.launch({
         headless: true,
         timeout: 0, // 8 minutes
-        protocolTimeout: 240000, // 60
+        protocolTimeout: 24000000, // 60
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
       const page = await browser.newPage();
