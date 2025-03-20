@@ -135,6 +135,7 @@ const surveyController = {
 
       // Launch a headless browser
       const browser = await puppeteer.launch({
+        executablePath: '/usr/bin/chromium-browser',
         headless: true,
         timeout: 0, // 8 minutes
         protocolTimeout: 24000000, // 60
@@ -159,13 +160,11 @@ const surveyController = {
       });
       // Stream the PDF to the response
       pdfStream.pipe(res);
-
     } catch (error) {
       console.log(error);
       next(error); // Pass error to middleware
     }
   },
-
 };
 
 module.exports = surveyController;
