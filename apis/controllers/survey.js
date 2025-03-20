@@ -143,7 +143,7 @@ const surveyController = {
       });
       const page = await browser.newPage();
 
-      await page.goto(`file://${filePath}`, { waitUntil: "load" });
+      await page.goto(`file:/${filePath}`, { waitUntil: "load" });
 
       const pdfWebStream = await page.createPDFStream({
         format: "A3",
