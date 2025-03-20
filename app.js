@@ -1,5 +1,5 @@
 const dotenv = require("dotenv");
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+dotenv.config({ path: `.env` });
 const helper = require("./helper/helper");
 const http = require("http");
 const app = require("./config/express");
