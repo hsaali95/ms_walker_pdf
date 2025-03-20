@@ -3,6 +3,8 @@ const supabase = require("../../utils/supabase-client");
 const moment = require("moment");
 const path = require("path");
 const fs = require("fs");
+// Convert Web Streams API to a Node.js stream
+const { Readable } = require("stream");
 const surveyController = {
   async generatePdf(req, res, next) {
     try {
@@ -139,47 +141,31 @@ const surveyController = {
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
       const page = await browser.newPage();
-      console.log("here");
+
       await page.goto(`file://${filePath}`, { waitUntil: "load" });
-      console.log("here2");
 
-      // Generate PDF buffer
-      const pdfBuffer = await page.pdf({
+      const pdfWebStream = await page.createPDFStream({
         format: "A3",
-        printBackground: true,
-        landscape: true,
-        timeout: 0, //or time taken for your process in ms (eg) 60000
+        timeout: 0,
       });
-      console.log("here3");
-      await browser.close();
-      console.log("here4");
+      const pdfStream = Readable.fromWeb(pdfWebStream);
 
-      // // Upload the PDF to Supabase
-      const { error: uploadError } = await supabase.storage
-        .from("mas-walker-file")
-        .upload(uniqueFileName, pdfBuffer, { contentType: "application/pdf" });
-      console.log("here5");
-      if (uploadError) {
-        throw new Error("Failed to upload file to Supabase");
-      }
+      // Set response headers for PDF download
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline; filename=generated.pdf");
 
-      await fs.promises.unlink(filePath);
+      pdfStream.on("end", async () => {
+        await browser.close();
+      });
+      // Stream the PDF to the response
+      pdfStream.pipe(res);
 
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from("mas-walker-file")
-        .getPublicUrl(uniqueFileName);
-
-      if (!publicUrlData || !publicUrlData.publicUrl) {
-        throw new Error("Failed to generate public URL for the uploaded file");
-      }
-
-      return res.status(200).json({ publicUrlData });
     } catch (error) {
       console.log(error);
       next(error); // Pass error to middleware
     }
   },
+
 };
 
 module.exports = surveyController;
