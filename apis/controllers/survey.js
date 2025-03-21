@@ -132,6 +132,11 @@ const surveyController = {
       }
 
       write();
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        'inline; filename="streamed-document.pdf"'
+      );
 
       var stream = wkhtmltopdf(fs.createReadStream(filePath));
       stream.pipe(res);
