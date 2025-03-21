@@ -127,19 +127,21 @@ const surveyController = {
         if (index < data.length) {
           writeStream.once("drain", write); // Wait for buffer to empty
         } else {
-          writeStream.end(() => console.log("File writing completed."));
+          writeStream.end(() => {
+            console.log("Read completed")
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader(
+              "Content-Disposition",
+              'inline; filename="streamed-document.pdf"'
+            );
+
+            var stream = wkhtmltopdf(fs.createReadStream(filePath));
+            stream.pipe(res);
+          });
         }
       }
 
       write();
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        'inline; filename="streamed-document.pdf"'
-      );
-
-      var stream = wkhtmltopdf(fs.createReadStream(filePath));
-      stream.pipe(res);
     } catch (error) {
       console.log(error);
       next(error); // Pass error to middleware
