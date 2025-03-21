@@ -4,7 +4,7 @@ const moment = require("moment");
 const path = require("path");
 const fs = require("fs");
 // Convert Web Streams API to a Node.js stream
-const { Readable } = require("stream");
+var wkhtmltopdf = require("wkhtmltopdf");
 const surveyController = {
   async generatePdf(req, res, next) {
     try {
@@ -133,33 +133,8 @@ const surveyController = {
 
       write();
 
-      // Launch a headless browser
-      const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium-browser',
-        headless: true,
-        timeout: 0, // 8 minutes
-        protocolTimeout: 24000000, // 60
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      });
-      const page = await browser.newPage();
-
-      await page.goto(`file:/${filePath}`, { waitUntil: "load" });
-
-      const pdfWebStream = await page.createPDFStream({
-        format: "A3",
-        timeout: 0,
-      });
-      const pdfStream = Readable.fromWeb(pdfWebStream);
-
-      // Set response headers for PDF download
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", "inline; filename=generated.pdf");
-
-      pdfStream.on("end", async () => {
-        await browser.close();
-      });
-      // Stream the PDF to the response
-      pdfStream.pipe(res);
+      var stream = wkhtmltopdf(fs.createReadStream(filePath));
+      stream.pipe(res);
     } catch (error) {
       console.log(error);
       next(error); // Pass error to middleware
